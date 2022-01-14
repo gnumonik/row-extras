@@ -32,6 +32,7 @@ library
       Data.Row.Extras.Util 
       Data.Row.Extras.BiForallX 
       Data.Row.Extras.Dictionaries
+      Data.Row.Extras.ApplyRow
   other-modules:
       Paths_row_extras
   hs-source-dirs:

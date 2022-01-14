@@ -16,10 +16,20 @@ import Data.Row.Extras.ApplyRow
       applyRow,
       rMap,
       rLookup ) 
+      
 import Data.Row.Extras.BiForallX ( BiForallX(..) )
+
 import Data.Row.Extras.Dictionaries
-    ( UniquenessProof(..), forall, unique, mkUniquenessProof )
+    ( UniquenessProof(..),
+      forall,
+      unique,
+      mkUniquenessProof,
+      forallX,
+      ui,
+      uiX )
+
 import Data.Row.Extras.ForallX ( ForallX(..) )
+
 import Data.Row.Extras.Records
     ( distributeX,
       foldX,
@@ -33,6 +43,7 @@ import Data.Row.Extras.Records
       uncomposeX,
       zipTransformX,
       MapForallX(..) )
+
 import Data.Row.Extras.Util
     ( mapcc,
       top,
