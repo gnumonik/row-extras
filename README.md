@@ -53,6 +53,7 @@ Finally, this library contains a (very experimental and rudimentary!) API in `Da
 
 Each module except `Data.Row.Extras.Records` is extensively documented. Please see the documentation for `Data.Row.Records` if the functions in Extras.Records confuse you. 
 
+This is all highly experimental, so if you see a mistake or a better way to do things, please open an issue or submit a pull request! 
 
 
 
