@@ -1,0 +1,57 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           row-extras
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/row-extras#readme>
+homepage:       https://github.com/githubuser/row-extras#readme
+bug-reports:    https://github.com/githubuser/row-extras/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2022 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/row-extras
+
+library
+  exposed-modules:
+      Data.Row.Extras.ForallX 
+      Data.Row.Extras.Records
+      Data.Row.Extras.Util 
+      Data.Row.Extras.BiForallX 
+      Data.Row.Extras.Dictionaries
+  other-modules:
+      Paths_row_extras
+  hs-source-dirs:
+      src
+    , src/Data/Row/Extras
+  build-depends:
+      base >=4.7 && <5
+    , singletons 
+    , singletons-base
+    , row-types 
+    , constraints
+  default-language: Haskell2010
+
+test-suite row-extras-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_row_extras
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , row-extras
+  default-language: Haskell2010
