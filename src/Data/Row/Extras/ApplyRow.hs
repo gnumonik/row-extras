@@ -1,10 +1,10 @@
-{-# LANGUAGE RankNTypes, TemplateHaskell #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications, ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE StandaloneKindSignatures #-}
-{-# LANGUAGE FlexibleInstances, OverloadedLabels #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
@@ -15,24 +15,37 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
-{-# LANGUAGE LambdaCase, MultiWayIf #-}
 
 module Data.Row.Extras.ApplyRow (
   Functorially(..), 
   Applicatively(..),
-
+  ApplyRow(..),
+  type Applied, -- DO NOT EXPORT CONSTRUCTOR, TOTALLY BREAKS TYPE SAFETY 
+  applyRow, 
+  FMap(..),
+  rMap,
+  rLookup
 ) where
 import Data.Row
+    ( KnownSymbol,
+      Forall,
+      Row,
+      HasType,
+      Label(Label),
+      Rec,
+      WellBehaved,
+      (.!) )
 import Data.Singletons
-import Data.Kind
+    ( type (@@), Sing, SingI(sing), TyCon1, type (~>) )
+import Data.Kind ( Type, Constraint )
 import Data.Constraint
+    ( Constraint, type (:-), Dict(..), (\\), mapDict )
 import GHC.TypeLits.Singletons (Symbol, withKnownSymbol)
-import Data.Row.Extras.ForallX
+import Data.Row.Extras.ForallX ( ForallX )
 import qualified Data.Row.Records as R
-import Data.Row.Extras.Records
-import Data.Row.Extras.Util
-import Data.Functor.Identity
+import Data.Row.Extras.Records ( mapX )
+import Data.Row.Extras.Util ( Coherent )
+import Data.Functor.Identity ( Identity(runIdentity) )
 import Data.Row.Extras.Dictionaries (forall)
 import qualified Unsafe.Coerce as UNSAFE
 import Data.Row.Dictionaries (mapHas)
@@ -45,7 +58,6 @@ rudimentary ATM but, assuming everything is solid here, it should be possible to
 a bunch of interesting ways.
 
 -}
-
 
 -- | Special GADT which holds this thing together. If we have one of these, we have evidence: 
 --
@@ -124,17 +136,17 @@ instance ( Applicatively p
          ) => ApplyRow rp l t where  
               liftT t = Of Dict (sing @l) (purely @p t)
 
--- | @Applied@ is a wrapper around `Rec (R.Map (Of rp) rt)` and uses applyRow as a kind of smart constructor.  
--- A record with that type signature,  *so long as it was constructed with the `applyRow` function*, holds a collection of elements paramterized by the 
--- functor at their label in the parameter row (of kind :: Type ~> Type) 
+-- | @Applied@ is a wrapper around @Rec (R.Map (Of rp) rt)@ and uses applyRow as a kind of smart constructor.  
+-- A record with that type signature,  *so long as it was constructed with the @applyRow@ function*, holds a collection of elements paramterized by the 
+-- functor at their label in the parameter row (of kind @:: Type ~> Type@) 
 -- 
--- This structure enforces some odd invariants: Every element of (R.Map (Of rp) rt) is an `Of rp x` GADT which contains a singleton of a symbol which 
--- serves as the label for some predicate in `rp`, for some `x` which (due to R.Map (Of rp)) *must* exist at label `l` in `rt`. As far as I can tell, it is 
+-- This structure enforces some odd invariants: Every element of @R.Map (Of rp) rt@ is an @Of rp x@ GADT which contains a singleton of a symbol which 
+-- serves as the label for some predicate in `rp`, for some `x` which (due to @R.Map (Of rp)@) *must* exist at label `l` in `rt`. As far as I can tell, it is 
 -- *impossible* (even with fancy Sigma stuff from the singletons library) to enforce that the singleton symbol inside `Of rp` matches the 
 -- label of `x` in `rt`. 
 -- 
 -- That is, in theory you could have (Of rp x) with the "wrong" functor inside (because the type of the functor depends on the symbol). Fortunately, 
--- this can be alleviated in practice by not exporting the `MkImplementation` constructor. 
+-- this can be alleviated in practice by not exporting the `MkApplied` constructor. 
 newtype Applied :: Row (Type ~> Type) -> Row Type -> Type where 
   MkApplied :: forall (rp :: Row (Type ~> Type)) (rt :: Row Type)  
                     . Rec (R.Map (Of rp) rt) 
@@ -178,7 +190,7 @@ class ( KnownSymbol l
             goB :: forall (l' :: Symbol) (p' :: Type ~> Type)  
                 .  Dict (HasType l' p' rp) -> Sing l' -> p' @@ a -> Of rp b 
             goB d@Dict sl pa = withKnownSymbol sl 
-                            $ goC d (forall @rp @Functorially @l' @p')  -- for some reason the continuation seems to be mandatory here 
+                             $ goC d (forall @rp @Functorially @l' @p')  -- for some reason the continuation seems to be mandatory here 
                                                                         -- despite the fact that goC and goD aren't introducing 
                                                                         -- any new universally quantified type variables. which shouldn't happen...
               where 
@@ -222,7 +234,7 @@ rLookup :: forall l f a rp rt
          ) => Applied rp rt 
            -> f a
 rLookup (MkApplied r) = case r .! (Label @l) \\ mapHas @(Of rp) @l @a @rt of 
-  (Of _ sl pt :: Of rp a) -> UNSAFE.unsafeCoerce pt :: f a -- Again, this is safe AS LONG AS the Implementation was created
+  (Of _ sl pt :: Of rp a) -> UNSAFE.unsafeCoerce pt :: f a -- Again, this is safe AS LONG AS the Applied was created
                                                            -- or manipulated using functions in this module.
                                                            -- (In order to satisfy the ForallX constraint, the labels have to line up, 
                                                            -- but we can't embed any meaningful proof that they do. Well, not here. Sort of can if (a :: k) and SingKind a)

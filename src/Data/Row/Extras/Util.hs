@@ -25,7 +25,7 @@ module Data.Row.Extras.Util (
 
 import Data.Row ( Row, Forall, Rec, WellBehaved )
 import Data.Kind ( Type, Constraint )
-import Data.Row.Internal
+import Data.Row.Internal ( Forall, Row, WellBehaved )
 import Data.Row.Dictionaries ( type (:-)(..), Dict(..) )
 import Data.Singletons ( Proxy(..) )
 import Data.Row.Records ( Rec )

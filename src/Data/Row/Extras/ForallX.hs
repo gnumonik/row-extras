@@ -13,20 +13,47 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module Data.Row.Extras.ForallX where
+module Data.Row.Extras.ForallX (ForallX(..)) where
 
 import Data.Row
-import Data.Kind
+    ( KnownSymbol,
+      AllUniqueLabels,
+      Forall,
+      Row,
+      Empty,
+      HasType,
+      Label(..),
+      type (.-) )
+import Data.Kind ( Type, Constraint )
 import Data.Row.Internal
-import Data.Row.Dictionaries
-import Data.Singletons
-import Data.Singletons.Sigma
-import Data.Functor.Identity
-import Data.Bifunctor
+    ( KnownSymbol,
+      LT((:->)),
+      FrontExtends(..),
+      AllUniqueLabels,
+      Extend,
+      Forall,
+      Unconstrained1,
+      Row(..),
+      Empty,
+      HasType,
+      Label(..),
+      type (.-),
+      FrontExtendsDict(FrontExtendsDict) )
+import Data.Row.Dictionaries ( Unconstrained1, Dict(Dict) )
+import Data.Singletons ( Proxy )
+import Data.Bifunctor ( Bifunctor(first) )
 import Data.Row.Records
-import Data.Type.Equality
+    ( KnownSymbol,
+      AllUniqueLabels,
+      Extend,
+      Forall,
+      Row,
+      Empty,
+      HasType,
+      Label(..),
+      type (.-) )
 import GHC.TypeLits (Symbol)
-import Data.Constraint
+import Data.Constraint ( Constraint, Dict(Dict) )
 
 type ForallX :: forall k. Row k -> (Symbol -> k -> Constraint) -> Constraint 
 class Forall r Unconstrained1 => ForallX (r :: Row k) (c :: Symbol -> k -> Constraint) -- (c' :: Symbol -> Constraint) 

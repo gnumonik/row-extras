@@ -10,9 +10,7 @@
 {-# LANGUAGE UndecidableSuperClasses #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE QuantifiedConstraints #-}
 
 module Data.Row.Extras.Records (
   MapForallX(..),
@@ -89,8 +87,6 @@ class (KnownSymbol l) => HasA c f l t  where
 
 instance (KnownSymbol l, c l a) => HasA c f l (f a) where 
   hasA = HasT sing Dict Refl 
-
-
 
 newtype RMapK  (f :: k -> Type) (ρ :: Row k) = RMapK { unRMapK :: Rec (Map f ρ) }
 

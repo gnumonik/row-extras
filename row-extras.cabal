@@ -25,6 +25,8 @@ source-repository head
 
 library
   exposed-modules:
+      Data.Row.Extras 
+
       Data.Row.Extras.ForallX 
       Data.Row.Extras.Records
       Data.Row.Extras.Util 
@@ -34,6 +36,7 @@ library
       Paths_row_extras
   hs-source-dirs:
       src
+    , src/Data/Row
     , src/Data/Row/Extras
   build-depends:
       base >=4.7 && <5
@@ -42,6 +45,8 @@ library
     , row-types 
     , constraints
   default-language: Haskell2010
+
+-- TODO: Default extensions
 
 test-suite row-extras-test
   type: exitcode-stdio-1.0

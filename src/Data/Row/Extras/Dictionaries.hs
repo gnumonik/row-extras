@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, TemplateHaskell #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications, ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeOperators #-}
@@ -13,12 +13,13 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
-{-# LANGUAGE LambdaCase, MultiWayIf #-}
 
-module Data.Row.Extras.Dictionaries where
+module Data.Row.Extras.Dictionaries (
+  forall,
+  unique,
+  UniquenessProof(..),
+  mkUniquenessProof
+) where
   
 import Data.Row
     ( KnownSymbol,
@@ -43,13 +44,14 @@ import Data.Row.Extras.Util ( Coherent(..) )
 
 -- This is a GADT which holds a dictionary. Here, it is used to implement `forall`, 
 -- although it serves other purposes in the rest of the library
-data ConstrainT (c :: k -> Constraint) :: k -> Type where
-  ConstrainT :: forall k (c :: k -> Constraint) (a :: k)
-               . Dict (c a) ->  ConstrainT c a
+data Constrained (c :: k -> Constraint) :: k -> Type where
+  Constrained :: forall k (c :: k -> Constraint) (a :: k)
+               . Dict (c a) ->  Constrained c a
 
--- Universal instantiation for Rows. If some row satisfies `Forall r c` then, 
--- presumably, if we know that `t` is an element of that row, we should also know that `t` 
--- satisfies `c. The `row-types` package doesn't include this entailment, but I needed it, so I made it. 
+-- | Universal instantiation for Rows. If some row satisfies `Forall r c` then, 
+-- if we know that `t` is an element of that row, we also know that `t` satisfies `c`. 
+--
+-- The `row-types` package doesn't include this entailment, but I needed it, so I made it. 
 forall :: forall r c l t
         . (Coherent r
         ,  Forall r c
@@ -58,17 +60,17 @@ forall :: forall r c l t
 forall = unmapDict go             -- If you have a dict: myDict = Dict @(HasType l t r), you can 
   where                           -- use `mapDict (forall @r @c @l @t) myDict` to get a `Dict @(c t)`
                                   -- (This lets us do things that wouldn't otherwise typecheck due to escaped skolems)
-                                  -- This is *extremely* powerful when combined with a uniqueness axiom (which isn't included here because 
-                                  -- I don't use it in this module )
     go :: Dict (HasType l t r) -> Dict (c t)
-    go Dict = case key .! (Label @l) \\ mapHas @(ConstrainT c) @l @t @r of 
-      ConstrainT d -> d 
+    go Dict = case key .! (Label @l) \\ mapHas @(Constrained c) @l @t @r of 
+      Constrained d -> d 
     
-    key :: Rec (R.Map (ConstrainT c) r)
-    key = R.transform @c @r @Proxy @(ConstrainT c) go2 (represent (Proxy @r))
+    key :: Rec (R.Map (Constrained c) r)
+    key = R.transform @c @r @Proxy @(Constrained c) go2 (represent (Proxy @r))
 
-    go2 :: forall a. c a => Proxy a -> ConstrainT c a
-    go2 _ = ConstrainT Dict 
+    go2 :: forall a. c a => Proxy a -> Constrained c a
+    go2 _ = Constrained Dict 
+
+{- It should be possible to write a `forallX` function...-}
 
 -- | Uniqueness axiom. If some row r has type t at label l,
 --   and all the labels in r are unique, then we know that 
