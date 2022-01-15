@@ -38,8 +38,6 @@ import Data.Bifunctor ( Bifunctor(first) )
 -- | @BiForallX@ is exactly like @BiForall@ from Data.Row.Internal, except the constraint is of kind 
 --   @:: Symbol -> k1 -> k2 -> Constraint@ instead of @k1 -> k2 -> Constraint@. 
 -- 
---   This only exists to rewrite a few Data.Row.Records functions, but there's *probably* a more powerful
---   way to use it which I haven't thought of. 
 class BiForallX (r1 :: Row k1) (r2 :: Row k2) (c :: Symbol -> k1 -> k2 -> Constraint) where
   -- | A metamorphism is an anamorphism (an unfold) followed by a catamorphism (a fold).
   biMetamorphX :: forall (p :: Type -> Type -> Type) (f :: Row k1 -> Row k2 -> Type) (g :: Row k1 -> Row k2 -> Type)

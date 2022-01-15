@@ -53,15 +53,13 @@ data Constrained (c :: k -> Constraint) :: k -> Type where
   Constrained :: forall k (c :: k -> Constraint) (a :: k)
                . Dict (c a) -> Constrained c a
 
--- This is a GADT which holds a dictionary. Here, it is used to implement `forall`, 
+-- This is a GADT which holds a dictionary. Here, it is used to implement `forallX`, 
 data ConstrainedX (c :: Symbol -> k -> Constraint) :: k -> Type where
   ConstrainedX :: forall k (c :: Symbol -> k -> Constraint) (a :: k) (l :: Symbol)
                . Sing l -> Dict (c l a) ->  ConstrainedX c a
 
--- | Universal instantiation for Rows. If some row satisfies `Forall r c` then, 
+-- | If some row satisfies `Forall r c` then, 
 -- if we know that `t` is an element of that row, we also know that `t` satisfies `c`. 
---
--- The `row-types` package doesn't include this entailment, but I needed it, so I made it. 
 forall :: forall r c l t
         . (Coherent r
         ,  Forall r c

@@ -77,13 +77,11 @@ mapcc f = unmapDict go
 
 type ConstraintX k = Symbol -> k -> Constraint  
 
--- | Class for things we can conjure into existence  (Like @KnownSymbol@/@KnownNat@ but for... anything)
---   Here, this is primarily used to generate a record of proxies from a proxy of a row.
+-- | A class to capture the idea of "things we can conjure into existence"  (Like @KnownSymbol@/@KnownNat@ but for anything)
 type Known :: Type -> Constraint 
 class Known a where 
   known :: a 
 
--- fun fact: these two instances actually *don't* overlap!
 instance Known (Proxy (a :: k)) where 
   known = Proxy 
 
@@ -103,8 +101,9 @@ class ( WellBehaved rk
       ) => Coherent (rk :: Row k)where 
             represent ::  Proxy rk -> Rec (R.Map Proxy rk)
             represent  _ = R.default' @Known known  
+            
 instance ( WellBehaved rk 
       , WellBehaved (R.Map Proxy rk) 
       , Forall (R.Map Proxy rk) Known 
-      ) => Coherent (rk :: Row k)where 
+      ) => Coherent (rk :: Row k)
 

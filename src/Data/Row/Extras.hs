@@ -4,7 +4,9 @@ module Data.Row.Extras (
   module Data.Row.Extras.Dictionaries,
   module Data.Row.Extras.ForallX, 
   module Data.Row.Extras.Records,
-  module Data.Row.Extras.Util
+  module Data.Row.Extras.Util,
+
+  module Data.Row.Extras.Relation  
 ) where
 
 import Data.Row.Extras.ApplyRow
@@ -52,3 +54,5 @@ import Data.Row.Extras.Util
       ConstraintX,
       Known(..),
       Top )
+
+import Data.Row.Extras.Relation ( biForallX )
